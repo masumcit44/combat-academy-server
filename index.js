@@ -49,7 +49,11 @@ async function run() {
     await client.connect();
 
     const usersCollection = client.db("combatDB").collection("users");
-    const topSliderCollection = client.db("combatDB").collection("topslider")
+    const topSliderCollection = client.db("combatDB").collection("topslider");
+    const popularClassCollection = client
+      .db("combatDB")
+      .collection("popularclass");
+
     //jwt
 
     app.post("/jwt", (req, res) => {
@@ -71,20 +75,27 @@ async function run() {
       const user = req.body;
       console.log(user);
       const query = { email: user?.email };
-      const existingUser = await usersCollection.findOne(query)
-      if(existingUser){
-        return res.send({message: "user already existed"})
+      const existingUser = await usersCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "user already existed" });
       }
       const result = await usersCollection.insertOne(user);
-      res.send(result)
+      res.send(result);
     });
 
     // top slider api
 
-    app.get("/topslider",async(req,res)=>{
-      const result = await topSliderCollection.find().toArray()
-      res.send(result)
-    })
+    app.get("/topslider", async (req, res) => {
+      const result = await topSliderCollection.find().toArray();
+      res.send(result);
+    });
+
+    // popular class
+
+    app.get("/popularclass", async (req, res) => {
+      const result = await popularClassCollection.find().toArray();
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
