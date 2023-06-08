@@ -53,6 +53,7 @@ async function run() {
     const popularClassCollection = client
       .db("combatDB")
       .collection("popularclass");
+    const instructorCollection = client.db("combatDB").collection("instructor");
 
     //jwt
 
@@ -94,6 +95,12 @@ async function run() {
 
     app.get("/popularclass", async (req, res) => {
       const result = await popularClassCollection.find().toArray();
+      res.send(result);
+    });
+
+    // instructor api
+    app.get("/instructor", async (req, res) => {
+      const result = await instructorCollection.find().toArray();
       res.send(result);
     });
 
