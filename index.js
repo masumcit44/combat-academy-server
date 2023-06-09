@@ -117,7 +117,13 @@ async function run() {
       const result = await selectedClassCollection.insertOne(selectedClass)
       res.send(result)
     })
-   
+    app.delete("/selectedclass/:id",async(req,res)=>{
+      const id = req.params.id;
+      // console.log(id);
+      const filter = {_id:new ObjectId(id)}
+      const result = await selectedClassCollection.deleteOne(filter)
+      res.send(result)
+    })
     // instructor api
     app.get("/instructor", async (req, res) => {
       const result = await instructorCollection.find().toArray();
