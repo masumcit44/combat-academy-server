@@ -55,8 +55,10 @@ async function run() {
       .db("combatDB")
       .collection("popularclass");
     const instructorCollection = client.db("combatDB").collection("instructor");
-    const selectedClassCollection = client.db("combatDB").collection("selectedclass")
-    const paymentCollection = client.db("combatDB").collection("payments")
+    const selectedClassCollection = client
+      .db("combatDB")
+      .collection("selectedclass");
+    const paymentCollection = client.db("combatDB").collection("payments");
     //jwt
 
     app.post("/jwt", (req, res) => {
@@ -74,13 +76,13 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/users/:email",async(req,res)=>{
-      const {email} = req.params
+    app.get("/users/:email", async (req, res) => {
+      const { email } = req.params;
       // console.log(email);
-      const query = {email : email}
-      const result = await usersCollection.findOne(query)
-      res.send(result)
-    })
+      const query = { email: email };
+      const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
 
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -108,42 +110,40 @@ async function run() {
       res.send(result);
     });
     // selectedclass
-    app.get("/selectedclass",async(req,res)=>{
-      const {email} = req.query
-      const result = await selectedClassCollection.find({email}).toArray()
-      res.send(result)
-    })
-    app.get("/selectedclass/:id",async(req,res)=>{
+    app.get("/selectedclass", async (req, res) => {
+      const { email } = req.query;
+      const result = await selectedClassCollection.find({ email }).toArray();
+      res.send(result);
+    });
+    app.get("/selectedclass/:id", async (req, res) => {
       const id = req.params.id;
-      if(id){
-        const filter = {_id:new ObjectId(id)}
-        
-        const result = await selectedClassCollection.findOne(filter)
-        res.send(result)
+      if (id) {
+        const filter = { _id: new ObjectId(id) };
+
+        const result = await selectedClassCollection.findOne(filter);
+        res.send(result);
       }
-  
-    })
-    app.post("/selectedclass",async(req,res)=>{
+    });
+    app.post("/selectedclass", async (req, res) => {
       const selectedClass = req.body;
       // console.log(selectedClass);
-      const result = await selectedClassCollection.insertOne(selectedClass)
-      res.send(result)
-    })
-    app.delete("/selectedclass/:id",async(req,res)=>{
+      const result = await selectedClassCollection.insertOne(selectedClass);
+      res.send(result);
+    });
+    app.delete("/selectedclass/:id", async (req, res) => {
       const id = req.params.id;
       // console.log(id);
-      const filter = {_id:new ObjectId(id)}
-      const result = await selectedClassCollection.deleteOne(filter)
-      res.send(result)
-    })
+      const filter = { _id: new ObjectId(id) };
+      const result = await selectedClassCollection.deleteOne(filter);
+      res.send(result);
+    });
     // instructor api
     app.get("/instructor", async (req, res) => {
       const result = await instructorCollection.find().toArray();
       res.send(result);
     });
 
-
-    // check student 
+    // check student
 
     app.get("/users/student/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
@@ -158,18 +158,54 @@ async function run() {
       res.send(result);
     });
 
-
-    // payment related api 
+    // payment related api
 
     app.post("/payments", verifyJWT, async (req, res) => {
       const payment = req.body;
-      const selectedId = payment.selectedId
-      const filter = {_id:new ObjectId(selectedId)}
-      const deleteResult = await selectedClassCollection.deleteOne(filter)
+      const selectedId = payment.selectedId;
+      const enrollId = payment.enrollId;
+      const enrollFilter = { _id: new ObjectId(enrollId) };
+      const findResult = await popularClassCollection.findOne(enrollFilter);
+      const EnrollStudent = findResult.studentsEnrolled;
+      console.log(EnrollStudent);
+      const updateClass = {
+        $set: {
+          studentsEnrolled: EnrollStudent + 1,
+        },
+      };
+      const options = { upsert: true };
+      const updatedResult = await popularClassCollection.updateOne(
+        enrollFilter,
+        updateClass,
+        options
+      );
+      const filter = { _id: new ObjectId(selectedId) };
+      const deleteResult = await selectedClassCollection.deleteOne(filter);
       const insertResult = await paymentCollection.insertOne(payment);
-      
-      res.send({ insertResult,deleteResult });
+
+      res.send({ insertResult, deleteResult,updatedResult });
     });
+
+    // app.patch("/payments", async (req, res) => {
+    //   const payment = req.body;
+    //   const enrollId = payment.enrollId;
+    //   const enrollFilter = { _id: new ObjectId(enrollId) };
+    //   const findResult = await popularClassCollection.findOne(enrollFilter);
+    //   const EnrollStudent = findResult.studentsEnrolled+1;
+    //   console.log(EnrollStudent);
+    //   const updateClass = {
+    //     $set: {
+    //       studentsEnrolled: EnrollStudent ,
+    //     },
+    //   };
+    //   const options = { upsert: true };
+    //   const updatedResult = await popularClassCollection.updateOne(
+    //     enrollFilter,
+    //     updateClass,
+    //     options
+    //   );
+    //   res.send(updatedResult);
+    // });
 
     app.post("/create-payment-intent", verifyJWT, async (req, res) => {
       const { price } = req.body;
@@ -185,8 +221,7 @@ async function run() {
         clientSecret: paymentIntent.client_secret,
       });
     });
-    
-    
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
