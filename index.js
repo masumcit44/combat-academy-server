@@ -56,6 +56,7 @@ async function run() {
       .collection("popularclass");
     const instructorCollection = client.db("combatDB").collection("instructor");
     const selectedClassCollection = client.db("combatDB").collection("selectedclass")
+    const paymentCollection = client.db("combatDB").collection("payments")
     //jwt
 
     app.post("/jwt", (req, res) => {
@@ -159,6 +160,16 @@ async function run() {
 
 
     // payment related api 
+
+    app.post("/payments", verifyJWT, async (req, res) => {
+      const payment = req.body;
+      const selectedId = payment.selectedId
+      const filter = {_id:new ObjectId(selectedId)}
+      const deleteResult = await selectedClassCollection.deleteOne(filter)
+      const insertResult = await paymentCollection.insertOne(payment);
+      
+      res.send({ insertResult,deleteResult });
+    });
 
     app.post("/create-payment-intent", verifyJWT, async (req, res) => {
       const { price } = req.body;
