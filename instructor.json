@@ -1,39 +1,44 @@
 [
-    {
-      "image": "https://images.unsplash.com/photo-1554302242-40743152783a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=386&q=80",
-      "martialArtName": "Karate",
-      "instructorName": "John Smith",
-      "studentsEnrolled": 50
-    },
-    {
-      "image": "https://images.unsplash.com/photo-1550759807-6419ff64a5e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=386&q=80",
-      "martialArtName": "Taekwondo",
-      "instructorName": "Emma Johnson",
-      "studentsEnrolled": 35
-    },
-    {
-      "image": "https://images.unsplash.com/photo-1579332409436-dc40da6edeaf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
-      "martialArtName": "Judo",
-      "instructorName": "Michael Davis",
-      "studentsEnrolled": 25
-    },
-    {
-      "image": "https://images.unsplash.com/photo-1585511543150-dc91145bbc77?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80",
-      "martialArtName": "Brazilian Jiu-Jitsu",
-      "instructorName": "Sophia Wilson",
-      "studentsEnrolled": 40
-    },
-    {
-      "image": "https://images.unsplash.com/photo-1551103941-cbe0990b4386?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=408&q=80",
-      "martialArtName": "Kung Fu",
-      "instructorName": "David Thompson",
-      "studentsEnrolled": 30
-    },
-    {
-      "image": "https://images.unsplash.com/photo-1608583252022-09323426b8b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=494&q=80",
-      "martialArtName": "Muay Thai",
-      "instructorName": "Jessica Anderson",
-      "studentsEnrolled": 45
-    }
-  ]
-  
+  {
+    "image": "https://images.unsplash.com/photo-1554302242-40743152783a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=386&q=80",
+    "martialArtName": "Karate",
+    "instructorName": "John Smith",
+    "studentsEnrolled": 50,
+    "email": "johnsmith@example.com"
+  },
+  {
+    "image": "https://images.unsplash.com/photo-1550759807-6419ff64a5e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=386&q=80",
+    "martialArtName": "Taekwondo",
+    "instructorName": "Emma Johnson",
+    "studentsEnrolled": 35,
+    "email": "emmajohnson@example.com"
+  },
+  {
+    "image": "https://images.unsplash.com/photo-1579332409436-dc40da6edeaf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=387&q=80",
+    "martialArtName": "Judo",
+    "instructorName": "Michael Davis",
+    "studentsEnrolled": 25,
+    "email": "michaeldavis@example.com"
+  },
+  {
+    "image": "https://plus.unsplash.com/premium_photo-1667941272804-241a41023093?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=871&q=80",
+    "martialArtName": "Brazilian Jiu-Jitsu",
+    "instructorName": "Sophia Wilson",
+    "studentsEnrolled": 40,
+    "email": "sophiawilson@example.com"
+  },
+  {
+    "image": "https://images.unsplash.com/photo-1551103941-cbe0990b4386?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=408&q=80",
+    "martialArtName": "Kung Fu",
+    "instructorName": "David Thompson",
+    "studentsEnrolled": 30,
+    "email": "davidthompson@example.com"
+  },
+  {
+    "image": "https://images.unsplash.com/photo-1608583252022-09323426b8b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=494&q=80",
+    "martialArtName": "Muay Thai",
+    "instructorName": "Jessica Anderson",
+    "studentsEnrolled": 45,
+    "email": "jessicaanderson@example.com"
+  }
+]
