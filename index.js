@@ -111,7 +111,13 @@ async function run() {
       const result = await selectedClassCollection.find({email}).toArray()
       res.send(result)
     })
-    
+    app.post("/selectedclass",async(req,res)=>{
+      const selectedClass = req.body;
+      // console.log(selectedClass);
+      const result = await selectedClassCollection.insertOne(selectedClass)
+      res.send(result)
+    })
+   
     // instructor api
     app.get("/instructor", async (req, res) => {
       const result = await instructorCollection.find().toArray();
