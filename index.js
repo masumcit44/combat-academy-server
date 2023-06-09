@@ -31,7 +31,7 @@ const verifyJWT = (req, res, next) => {
   });
 };
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bs8dc9c.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -54,7 +54,7 @@ async function run() {
       .db("combatDB")
       .collection("popularclass");
     const instructorCollection = client.db("combatDB").collection("instructor");
-
+    const selectedClassCollection = client.db("combatDB").collection("selectedclass")
     //jwt
 
     app.post("/jwt", (req, res) => {
@@ -105,13 +105,37 @@ async function run() {
       const result = await popularClassCollection.find().toArray();
       res.send(result);
     });
-
+    // selectedclass
+    app.get("/selectedclass",async(req,res)=>{
+      const {email} = req.query
+      const result = await selectedClassCollection.find({email}).toArray()
+      res.send(result)
+    })
+    
     // instructor api
     app.get("/instructor", async (req, res) => {
       const result = await instructorCollection.find().toArray();
       res.send(result);
     });
 
+
+    // check student 
+
+    app.get("/users/student/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      if (req.decoded.email !== email) {
+        res.send({ student: false });
+      }
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = {
+        student: user?.role === "student",
+      };
+      res.send(result);
+    });
+
+    
+    
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
