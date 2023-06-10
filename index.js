@@ -32,6 +32,7 @@ const verifyJWT = (req, res, next) => {
   });
 };
 
+
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bs8dc9c.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -64,6 +65,33 @@ async function run() {
       .collection("enrolledclass");
 
     const paymentHistoryCollection = client.db("combatDB").collection("payments")
+
+    
+const verifyAdmin = async (req, res, next) => {
+  const email = req.decoded.email;
+  const query = { email: email };
+  const user = await usersCollection.findOne(query);
+  if (user?.role !== "admin") {
+    return res
+      .status(403)
+      .send({ error: true, message: "forbidden access" });
+  }
+  next();
+};
+const verifyInstructor = async (req, res, next) => {
+  const email = req.decoded.email;
+  const query = { email: email };
+  const user = await usersCollection.findOne(query);
+  if (user?.role !== "instructor") {
+    return res
+      .status(403)
+      .send({ error: true, message: "forbidden access" });
+  }
+  next();
+};
+
+
+    
     //jwt
 
     app.post("/jwt", (req, res) => {
@@ -86,6 +114,32 @@ async function run() {
       // console.log(email);
       const query = { email: email };
       const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
+    //checking user is student or not
+    app.get("/users/student/:email", verifyJWT, async (req, res) => {
+      const email = req.params.email;
+      if (req.decoded.email !== email) {
+        res.send({ student: false });
+      }
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = {
+        user: user?.role === "student",
+      };
+      res.send(result);
+    });
+    // checking instructor or not 
+    app.get("/users/instructor/:email", verifyJWT,verifyInstructor ,async (req, res) => {
+      const email = req.params.email;
+      if (req.decoded.email !== email) {
+        res.send({ instructor: false });
+      }
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = {
+        user: user?.role === "instructor",
+      };
       res.send(result);
     });
 
