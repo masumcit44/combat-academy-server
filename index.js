@@ -70,7 +70,14 @@ async function run() {
       .db("combatDB")
       .collection("addedclass");
     // add class by instructor api
-
+    app.get("/myclass",async(req,res)=>{
+    
+      const {email} = req.query;
+      const result = await addedClassesByInstructorCollection.find({email}).toArray()
+      res.send(result)
+      
+    })
+    
     app.post('/addclass',async(req,res)=>{
       const addedClass = req.body;
       // console.log(addedClass);
