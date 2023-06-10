@@ -59,6 +59,9 @@ async function run() {
       .db("combatDB")
       .collection("selectedclass");
     const paymentCollection = client.db("combatDB").collection("payments");
+    const enrolledClassesCollection = client
+      .db("combatDB")
+      .collection("enrolledclass");
     //jwt
 
     app.post("/jwt", (req, res) => {
@@ -162,12 +165,17 @@ async function run() {
 
     app.post("/payments", verifyJWT, async (req, res) => {
       const payment = req.body;
+      
+      const email = payment.email
       const selectedId = payment.selectedId;
       const enrollId = payment.enrollId;
       const enrollFilter = { _id: new ObjectId(enrollId) };
       const findResult = await popularClassCollection.findOne(enrollFilter);
+      findResult.email = email;
+      const enrolledClassResult = await enrolledClassesCollection.insertOne(
+        findResult
+      );
       const EnrollStudent = findResult.studentsEnrolled;
-      console.log(EnrollStudent);
       const updateClass = {
         $set: {
           studentsEnrolled: EnrollStudent + 1,
@@ -183,29 +191,16 @@ async function run() {
       const deleteResult = await selectedClassCollection.deleteOne(filter);
       const insertResult = await paymentCollection.insertOne(payment);
 
-      res.send({ insertResult, deleteResult,updatedResult });
+      res.send({
+        insertResult,
+        deleteResult,
+        updatedResult,
+        findResult,
+        enrolledClassResult,
+      });
     });
 
-    // app.patch("/payments", async (req, res) => {
-    //   const payment = req.body;
-    //   const enrollId = payment.enrollId;
-    //   const enrollFilter = { _id: new ObjectId(enrollId) };
-    //   const findResult = await popularClassCollection.findOne(enrollFilter);
-    //   const EnrollStudent = findResult.studentsEnrolled+1;
-    //   console.log(EnrollStudent);
-    //   const updateClass = {
-    //     $set: {
-    //       studentsEnrolled: EnrollStudent ,
-    //     },
-    //   };
-    //   const options = { upsert: true };
-    //   const updatedResult = await popularClassCollection.updateOne(
-    //     enrollFilter,
-    //     updateClass,
-    //     options
-    //   );
-    //   res.send(updatedResult);
-    // });
+    
 
     app.post("/create-payment-intent", verifyJWT, async (req, res) => {
       const { price } = req.body;
@@ -221,6 +216,14 @@ async function run() {
         clientSecret: paymentIntent.client_secret,
       });
     });
+
+    // enrolled class
+
+    app.get("/enrolledclass",async(req,res)=>{
+      const {email} = req.query;
+      const result = await enrolledClassesCollection.find({email}).toArray()
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
