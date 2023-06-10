@@ -62,6 +62,8 @@ async function run() {
     const enrolledClassesCollection = client
       .db("combatDB")
       .collection("enrolledclass");
+
+    const paymentHistoryCollection = client.db("combatDB").collection("payments")
     //jwt
 
     app.post("/jwt", (req, res) => {
@@ -165,7 +167,6 @@ async function run() {
 
     app.post("/payments", verifyJWT, async (req, res) => {
       const payment = req.body;
-      
       const email = payment.email
       const selectedId = payment.selectedId;
       const enrollId = payment.enrollId;
@@ -223,6 +224,13 @@ async function run() {
       const {email} = req.query;
       const result = await enrolledClassesCollection.find({email}).toArray()
       res.send(result);
+    })
+    // payment history 
+    app.get("/paymenthistory",async(req,res)=>{
+      const {email} = req.query;
+      const result = await paymentHistoryCollection.find({email}).toArray()
+      
+      res.send(result)
     })
 
     // Send a ping to confirm a successful connection
