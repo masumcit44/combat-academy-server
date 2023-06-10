@@ -32,7 +32,6 @@ const verifyJWT = (req, res, next) => {
   });
 };
 
-
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.bs8dc9c.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -64,34 +63,44 @@ async function run() {
       .db("combatDB")
       .collection("enrolledclass");
 
-    const paymentHistoryCollection = client.db("combatDB").collection("payments")
+    const paymentHistoryCollection = client
+      .db("combatDB")
+      .collection("payments");
+    const addedClassesByInstructorCollection = client
+      .db("combatDB")
+      .collection("addedclass");
+    // add class by instructor api
 
-    
-const verifyAdmin = async (req, res, next) => {
-  const email = req.decoded.email;
-  const query = { email: email };
-  const user = await usersCollection.findOne(query);
-  if (user?.role !== "admin") {
-    return res
-      .status(403)
-      .send({ error: true, message: "forbidden access" });
-  }
-  next();
-};
-const verifyInstructor = async (req, res, next) => {
-  const email = req.decoded.email;
-  const query = { email: email };
-  const user = await usersCollection.findOne(query);
-  if (user?.role !== "instructor") {
-    return res
-      .status(403)
-      .send({ error: true, message: "forbidden access" });
-  }
-  next();
-};
+    app.post('/addclass',async(req,res)=>{
+      const addedClass = req.body;
+      // console.log(addedClass);
+      const result = await addedClassesByInstructorCollection.insertOne(addedClass)
+      res.send(result)
+    })
 
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      if (user?.role !== "admin") {
+        return res
+          .status(403)
+          .send({ error: true, message: "forbidden access" });
+      }
+      next();
+    };
+    const verifyInstructor = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      if (user?.role !== "instructor") {
+        return res
+          .status(403)
+          .send({ error: true, message: "forbidden access" });
+      }
+      next();
+    };
 
-    
     //jwt
 
     app.post("/jwt", (req, res) => {
@@ -129,19 +138,24 @@ const verifyInstructor = async (req, res, next) => {
       };
       res.send(result);
     });
-    // checking instructor or not 
-    app.get("/users/instructor/:email", verifyJWT,verifyInstructor ,async (req, res) => {
-      const email = req.params.email;
-      if (req.decoded.email !== email) {
-        res.send({ instructor: false });
+    // checking instructor or not
+    app.get(
+      "/users/instructor/:email",
+      verifyJWT,
+      verifyInstructor,
+      async (req, res) => {
+        const email = req.params.email;
+        if (req.decoded.email !== email) {
+          res.send({ instructor: false });
+        }
+        const query = { email: email };
+        const user = await usersCollection.findOne(query);
+        const result = {
+          user: user?.role === "instructor",
+        };
+        res.send(result);
       }
-      const query = { email: email };
-      const user = await usersCollection.findOne(query);
-      const result = {
-        user: user?.role === "instructor",
-      };
-      res.send(result);
-    });
+    );
 
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -221,7 +235,7 @@ const verifyInstructor = async (req, res, next) => {
 
     app.post("/payments", verifyJWT, async (req, res) => {
       const payment = req.body;
-      const email = payment.email
+      const email = payment.email;
       const selectedId = payment.selectedId;
       const enrollId = payment.enrollId;
       const enrollFilter = { _id: new ObjectId(enrollId) };
@@ -255,8 +269,6 @@ const verifyInstructor = async (req, res, next) => {
       });
     });
 
-    
-
     app.post("/create-payment-intent", verifyJWT, async (req, res) => {
       const { price } = req.body;
       // console.log(price);
@@ -274,19 +286,19 @@ const verifyInstructor = async (req, res, next) => {
 
     // enrolled class
 
-    app.get("/enrolledclass",async(req,res)=>{
-      const {email} = req.query;
-      const result = await enrolledClassesCollection.find({email}).toArray()
+    app.get("/enrolledclass", async (req, res) => {
+      const { email } = req.query;
+      const result = await enrolledClassesCollection.find({ email }).toArray();
       res.send(result);
-    })
-    // payment history 
-    app.get("/paymenthistory",async(req,res)=>{
-      const {email} = req.query;
-      const result = await paymentHistoryCollection.find({email}).toArray()
-      
-      res.send(result)
-    })
+    });
+    // payment history
+    app.get("/paymenthistory", async (req, res) => {
+      const { email } = req.query;
+      const result = await paymentHistoryCollection.find({ email }).toArray();
 
+      res.send(result);
+    });
+    //
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
