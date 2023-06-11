@@ -69,32 +69,70 @@ async function run() {
     const addedClassesByInstructorCollection = client
       .db("combatDB")
       .collection("addedclass");
-      // admin route
-    app.get("/allclasses",async(req,res)=>{
-      const result = await addedClassesByInstructorCollection.find().toArray()
-      res.send(result)
-    })
+    // admin route
+    app.get("/allclasses", async (req, res) => {
+      const result = await addedClassesByInstructorCollection.find().toArray();
+      res.send(result);
+    });
+    app.put("/allclasses/:id", async (req, res) => {
+      const id = req.params.id;
+      const card = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const doc = {
+        insertedId: id,
+        image: card.image,
+        martialArtName: card.martialArtName,
+        instructorName: card.instructorName,
+        studentsEnrolled: card.studentsEnrolled,
+        price: card.price,
+      };
+      // console.log(doc);
+      const updatedClass = {
+        $set: {
+          status: card.click,
+        },
+      };
+      const options = { upsert: true };
+      if (card.click == "denied") {
+        const result = await addedClassesByInstructorCollection.updateOne(
+          filter,
+          updatedClass,
+          options
+        );
+        return res.send({ result });
+      } else {
+        const insertResult = await popularClassCollection.insertOne(doc);
+        const result = await addedClassesByInstructorCollection.updateOne(
+          filter,
+          updatedClass,
+          options
+        );
+        return res.send({ result, insertResult });
+      }
+    });
     // add class by instructor api
-    app.get("/myclass",async(req,res)=>{
-    
-      const {email} = req.query;
-      const result = await addedClassesByInstructorCollection.find({email}).toArray()
-      res.send(result)
-      
-    })
-    
-    app.post('/addclass',async(req,res)=>{
+    app.get("/myclass", async (req, res) => {
+      const { email } = req.query;
+      const result = await addedClassesByInstructorCollection
+        .find({ email })
+        .toArray();
+      res.send(result);
+    });
+
+    app.post("/addclass", async (req, res) => {
       const addedClass = req.body;
       // console.log(addedClass);
-      const result = await addedClassesByInstructorCollection.insertOne(addedClass)
-      res.send(result)
-    })
+      const result = await addedClassesByInstructorCollection.insertOne(
+        addedClass
+      );
+      res.send(result);
+    });
 
     const verifyAdmin = async (req, res, next) => {
       const email = req.decoded.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
-      if (user?.role == "student" && user?.role == "instructor" ) {
+      if (user?.role == "student" && user?.role == "instructor") {
         return res
           .status(403)
           .send({ error: true, message: "forbidden access" });
@@ -169,24 +207,19 @@ async function run() {
       }
     );
     // checking admin or not
-    app.get(
-      "/users/admin/:email",
-      verifyJWT,
-      verifyAdmin,
-      async (req, res) => {
-        const email = req.params.email;
-        // console.log(email);
-        if (req.decoded.email !== email) {
-          res.send({ admin: false });
-        }
-        const query = { email: email };
-        const user = await usersCollection.findOne(query);
-        const result = {
-          user: user?.role === "admin",
-        };
-        res.send(result);
+    app.get("/users/admin/:email", verifyJWT, verifyAdmin, async (req, res) => {
+      const email = req.params.email;
+      // console.log(email);
+      if (req.decoded.email !== email) {
+        res.send({ admin: false });
       }
-    );
+      const query = { email: email };
+      const user = await usersCollection.findOne(query);
+      const result = {
+        user: user?.role === "admin",
+      };
+      res.send(result);
+    });
 
     app.post("/users", async (req, res) => {
       const user = req.body;
