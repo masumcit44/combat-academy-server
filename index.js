@@ -110,6 +110,30 @@ async function run() {
         return res.send({ result, insertResult });
       }
     });
+
+    // admin feedback
+
+    app.put("/feedback/:id", async (req, res) => {
+      const id = req.params.id;
+      const feedback = req.body;
+      const filter = { _id: new ObjectId(id) };
+      // console.log(feedback);
+      const updatedClass = {
+        $set: {
+          feedback: feedback.feedback,
+        }
+      };
+      const options = { upsert: true };
+      
+        const result = await addedClassesByInstructorCollection.updateOne(
+          filter,
+          updatedClass,
+          options
+        );
+        return res.send( result);
+      
+    });
+    
     // add class by instructor api
     app.get("/myclass", async (req, res) => {
       const { email } = req.query;
