@@ -69,6 +69,11 @@ async function run() {
     const addedClassesByInstructorCollection = client
       .db("combatDB")
       .collection("addedclass");
+      // admin route
+    app.get("/allclasses",async(req,res)=>{
+      const result = await addedClassesByInstructorCollection.find().toArray()
+      res.send(result)
+    })
     // add class by instructor api
     app.get("/myclass",async(req,res)=>{
     
@@ -89,7 +94,7 @@ async function run() {
       const email = req.decoded.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
-      if (user?.role !== "admin") {
+      if (user?.role == "student" && user?.role == "instructor" ) {
         return res
           .status(403)
           .send({ error: true, message: "forbidden access" });
@@ -100,7 +105,7 @@ async function run() {
       const email = req.decoded.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
-      if (user?.role !== "instructor") {
+      if (user?.role != "instructor") {
         return res
           .status(403)
           .send({ error: true, message: "forbidden access" });
@@ -159,6 +164,25 @@ async function run() {
         const user = await usersCollection.findOne(query);
         const result = {
           user: user?.role === "instructor",
+        };
+        res.send(result);
+      }
+    );
+    // checking admin or not
+    app.get(
+      "/users/admin/:email",
+      verifyJWT,
+      verifyAdmin,
+      async (req, res) => {
+        const email = req.params.email;
+        // console.log(email);
+        if (req.decoded.email !== email) {
+          res.send({ admin: false });
+        }
+        const query = { email: email };
+        const user = await usersCollection.findOne(query);
+        const result = {
+          user: user?.role === "admin",
         };
         res.send(result);
       }
