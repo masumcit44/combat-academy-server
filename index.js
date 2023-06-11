@@ -133,6 +133,26 @@ async function run() {
         return res.send( result);
       
     });
+
+    app.get("/allusers",async(req,res)=>{
+      const result = await usersCollection.find().toArray()
+      res.send(result)
+    })
+
+    app.put("/allusers/:id",async(req,res)=>{
+      const id = req.params.id;
+      const filter = {_id:new ObjectId(id)}
+      const {role} = req.body;
+      console.log(role,id);
+      const updateUser = {
+        $set: {
+          role: role,
+        }
+      };
+      const options = { upsert: true };
+      const updateResult = await usersCollection.updateOne(filter,updateUser,options)
+      res.send(updateResult)
+    })
     
     // add class by instructor api
     app.get("/myclass", async (req, res) => {
