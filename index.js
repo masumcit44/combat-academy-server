@@ -121,44 +121,56 @@ async function run() {
       const updatedClass = {
         $set: {
           feedback: feedback.feedback,
-        }
+        },
       };
       const options = { upsert: true };
-      
-        const result = await addedClassesByInstructorCollection.updateOne(
-          filter,
-          updatedClass,
-          options
-        );
-        return res.send( result);
-      
+
+      const result = await addedClassesByInstructorCollection.updateOne(
+        filter,
+        updatedClass,
+        options
+      );
+      return res.send(result);
     });
 
-    app.get("/allusers",async(req,res)=>{
-      const result = await usersCollection.find().toArray()
-      res.send(result)
-    })
+    app.get("/allusers", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+    app.get("/checkuser", async (req, res) => {
+      const email = req.query;
+      // console.log(email);
+      const result = await usersCollection.findOne(email);
+      res.send(result);
+    });
 
-    app.put("/allusers/:id",async(req,res)=>{
+    app.put("/allusers/:id", async (req, res) => {
       const id = req.params.id;
-      const filter = {_id:new ObjectId(id)}
-      const {role} = req.body;
-      console.log(role,id);
+      const filter = { _id: new ObjectId(id) };
+      const { role } = req.body;
+      // console.log(role,id);
       const updateUser = {
         $set: {
           role: role,
-        }
+        },
       };
       const options = { upsert: true };
-      const updateResult = await usersCollection.updateOne(filter,updateUser,options)
-      res.send(updateResult)
-    })
-    
+      const updateResult = await usersCollection.updateOne(
+        filter,
+        updateUser,
+        options
+      );
+      res.send(updateResult);
+    });
+
     // add class by instructor api
     app.get("/myclass", async (req, res) => {
-      const { email } = req.query;
+      const {email} = req.query;
+      const query = {
+        instructorEmail : email
+      }
       const result = await addedClassesByInstructorCollection
-        .find({ email })
+        .find( query )
         .toArray();
       res.send(result);
     });
@@ -176,7 +188,7 @@ async function run() {
       const email = req.decoded.email;
       const query = { email: email };
       const user = await usersCollection.findOne(query);
-      if (user?.role == "student" && user?.role == "instructor") {
+      if (user?.role !== "admin") {
         return res
           .status(403)
           .send({ error: true, message: "forbidden access" });
@@ -267,7 +279,7 @@ async function run() {
 
     app.post("/users", async (req, res) => {
       const user = req.body;
-      console.log(user);
+      // console.log(user);
       const query = { email: user?.email };
       const existingUser = await usersCollection.findOne(query);
       if (existingUser) {
@@ -298,9 +310,9 @@ async function run() {
     });
     app.get("/selectedclass/:id", async (req, res) => {
       const id = req.params.id;
+      // console.log(id);
       if (id) {
         const filter = { _id: new ObjectId(id) };
-
         const result = await selectedClassCollection.findOne(filter);
         res.send(result);
       }
@@ -346,9 +358,13 @@ async function run() {
       const email = payment.email;
       const selectedId = payment.selectedId;
       const enrollId = payment.enrollId;
+      payment.studentsEnrolled=parseInt(payment.studentsEnrolled)+1
       const enrollFilter = { _id: new ObjectId(enrollId) };
       const findResult = await popularClassCollection.findOne(enrollFilter);
       findResult.email = email;
+      delete findResult._id;
+      // console.log(findResult);
+      const addedClassFilter = { _id: new ObjectId(findResult.insertedId) }
       const enrolledClassResult = await enrolledClassesCollection.insertOne(
         findResult
       );
@@ -364,16 +380,22 @@ async function run() {
         updateClass,
         options
       );
+      const addedClassUpdateResult = await addedClassesByInstructorCollection.updateOne(
+        addedClassFilter,
+        updateClass,
+        options
+      );
       const filter = { _id: new ObjectId(selectedId) };
       const deleteResult = await selectedClassCollection.deleteOne(filter);
       const insertResult = await paymentCollection.insertOne(payment);
-
+      
       res.send({
-        insertResult,
-        deleteResult,
-        updatedResult,
         findResult,
         enrolledClassResult,
+        updatedResult,
+        deleteResult,
+        insertResult,
+        addedClassUpdateResult
       });
     });
 
