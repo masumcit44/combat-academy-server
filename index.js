@@ -47,7 +47,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     const usersCollection = client.db("combatDB").collection("users");
     const topSliderCollection = client.db("combatDB").collection("topslider");
@@ -81,12 +81,15 @@ async function run() {
       const doc = {
         insertedId: id,
         image: card.image,
+        instructorImage:card.instructorImage,
         martialArtName: card.martialArtName,
         instructorName: card.instructorName,
+        email: card.instructorEmail,
         studentsEnrolled: card.studentsEnrolled,
         price: card.price,
       };
       // console.log(doc);
+      
       const updatedClass = {
         $set: {
           status: card.click,
@@ -101,13 +104,14 @@ async function run() {
         );
         return res.send({ result });
       } else {
+        const approvedInstructorResult = await instructorCollection.insertOne(doc);
         const insertResult = await popularClassCollection.insertOne(doc);
         const result = await addedClassesByInstructorCollection.updateOne(
           filter,
           updatedClass,
           options
         );
-        return res.send({ result, insertResult });
+        return res.send({ result, insertResult ,approvedInstructorResult});
       }
     });
 
@@ -177,7 +181,8 @@ async function run() {
 
     app.post("/addclass", async (req, res) => {
       const addedClass = req.body;
-      // console.log(addedClass);
+      console.log(addedClass);
+      
       const result = await addedClassesByInstructorCollection.insertOne(
         addedClass
       );
